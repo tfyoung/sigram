@@ -3,6 +3,9 @@ TEMPLATE = app
 QT += qml quick widgets sql
 DESTDIR = ../build
 
+INCLUDEPATH += /usr/include/libqtelegram/
+LIBS += -lqtelegram
+
 database.source = database/userdata.db
 database.target = $${DESTDIR}
 fonts.source = fonts
