@@ -35,6 +35,8 @@ Column {
 
     property bool error: false
 
+    signal goEmitted()
+
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
@@ -100,6 +102,7 @@ Column {
         if( auth_code_line.text.length == 0 )
             return
 
-        Telegram.waitAndGetAuthCodeCallBack( auth_code_line.text, false )
+        tgClient.authSignIn(auth_code_line.text)
+        goEmitted()
     }
 }

@@ -39,6 +39,10 @@ Item {
 
             tgClient.authSendCode()
         }
+        onAuthLoggedIn: {
+            Gui.phoneNumber = tgClient.phoneNumber
+            register_frame.destroy()
+        }
     }
 
     Column {
@@ -89,6 +93,10 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             visible: false
+            onGoEmitted: {
+                indicator.visible = true
+                code.visible = false
+            }
         }
 
         RegisterFrameUser {
@@ -96,6 +104,10 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             visible: false
+            onGoEmitted: {
+                indicator.visible = true
+                user.visible = false
+            }
         }
 
         Indicator {
