@@ -32,7 +32,7 @@
 #include "countries.h"
 #include "setobject.h"
 #include "userdata.h"
-#include "telegram/telegram.h"
+#include "telegram/stelegram.h"
 #ifdef Q_OS_LINUX
 #include "notification.h"
 #endif
@@ -88,7 +88,7 @@ public:
     VersionChecker *version_checker;
 
     QQmlApplicationEngine *engine;
-    Telegram *tg;
+    STelegram *tg;
 
     char *args;
 
@@ -96,6 +96,8 @@ public:
 
     qreal chatListWidth;
     QString background;
+    QString homePath;
+    QString phoneNumber;
     bool mute_all;
     bool firstTime;
     int love;
@@ -133,6 +135,8 @@ TelegramGui::TelegramGui(QObject *parent) :
         tg_settings = new QSettings( HOME_PATH + "/telegram.conf", QSettings::IniFormat, this);
 
     p->background = tg_settings->value( "General/background", QString() ).toString();
+    p->phoneNumber = tg_settings->value( "General/phoneNumber", QString() ).toString();
+    p->homePath = tg_settings->value( "General/homePath", HOME_PATH ).toString();
     p->chatListWidth = tg_settings->value( "General/chatListWidth", 250 ).toDouble();
     p->firstTime = tg_settings->value( "General/firstTime", true ).toBool();
     p->width = tg_settings->value( "General/width", 1024 ).toInt();
@@ -272,6 +276,41 @@ void TelegramGui::setBackground(const QString &path)
 QString TelegramGui::background() const
 {
     return p->background;
+}
+
+void TelegramGui::setPhoneNumber(const QString &phone)
+{
+    if( phone == p->phoneNumber )
+        return;
+
+    p->phoneNumber = phone;
+    tg_settings->setValue( "General/phoneNumber", p->phoneNumber );
+    emit phoneNumberChanged();
+}
+
+QString TelegramGui::phoneNumber() const
+{
+    return p->phoneNumber;
+}
+
+void TelegramGui::setHomePath(const QString &path)
+{
+    if( path == p->homePath )
+        return;
+
+    p->homePath = path;
+    tg_settings->setValue( "General/homePath", p->homePath );
+    emit homePathChanged();
+}
+
+QString TelegramGui::homePath() const
+{
+    return p->homePath;
+}
+
+QString TelegramGui::tgServer() const
+{
+    return QCoreApplication::applicationDirPath() + "/tg-server.pub";
 }
 
 void TelegramGui::setChatListWidth(qreal w)
@@ -578,7 +617,7 @@ void TelegramGui::start()
     if( p->engine )
         return;
 
-    p->tg = new Telegram(1,&(p->args));
+    p->tg = new STelegram(1,&(p->args));
     p->userdata = new UserData(this);
     p->emojis = new Emojis(this);
     p->version_checker = new VersionChecker(this);

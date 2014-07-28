@@ -25,8 +25,8 @@
 
 #include "telegram/strcuts.h"
 
-class TelegramPrivate;
-class Telegram : public QObject
+class STelegramPrivate;
+class STelegram : public QObject
 {
     Q_PROPERTY(bool started READ started NOTIFY startedChanged)
     Q_PROPERTY(int me READ me NOTIFY meChanged)
@@ -35,8 +35,8 @@ class Telegram : public QObject
     Q_PROPERTY(int unread READ unread NOTIFY unreadChanged)
     Q_OBJECT
 public:
-    Telegram(int argc, char **argv, QObject *parent = 0);
-    ~Telegram();
+    STelegram(int argc, char **argv, QObject *parent = 0);
+    ~STelegram();
 
     Q_INVOKABLE QList<int> contactListUsers();
     UserClass contact(int id ) const;
@@ -200,7 +200,7 @@ protected:
     void timerEvent(QTimerEvent *e);
 
 private:
-    TelegramPrivate *p;
+    STelegramPrivate *p;
 };
 
 #endif // TELEGRAM_H

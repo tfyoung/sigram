@@ -24,6 +24,23 @@ Item {
     width: 100
     height: 62
 
+    Connections {
+        target: tgClient
+        onAuthCheckPhoneAnswer: {
+            indicator.visible = false
+            phone.visible = false
+            code.visible = false
+            user.visible = false
+
+            if( phoneRegistered )
+                code.visible = true
+            else
+                user.visible = true
+
+            tgClient.authSendCode()
+        }
+    }
+
     Column {
         anchors.left: parent.left
         anchors.right: parent.right
@@ -61,29 +78,33 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 300
-            visible: Telegram.waitAndGet == Enums.PhoneNumber
+            onGoEmitted: {
+                indicator.visible = true
+                phone.visible = false
+            }
         }
 
         RegisterFrameCode {
             id: code
             anchors.left: parent.left
             anchors.right: parent.right
-            visible: Telegram.waitAndGet == Enums.AuthCode
+            visible: false
         }
 
         RegisterFrameUser {
             id: user
             anchors.left: parent.left
             anchors.right: parent.right
-            visible: Telegram.waitAndGet == Enums.UserDetails
+            visible: false
         }
 
         Indicator {
+            id: indicator
             anchors.left: parent.left
             anchors.right: parent.right
             height: 200
-            visible: Telegram.waitAndGet == Enums.CheckingState
             source: "files/indicator_light.png"
+            visible: false
             onVisibleChanged: {
                 if( visible )
                     start()

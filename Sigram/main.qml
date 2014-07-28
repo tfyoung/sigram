@@ -19,6 +19,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Window {
     id: main
@@ -42,6 +43,8 @@ Window {
     property alias chatFrame: chat_frame
     property alias flipMenu: flip_menu
 
+    property alias tgClient: client
+
     property alias focus: main_frame.focus
 
     property int forwarding: 0
@@ -49,19 +52,30 @@ Window {
 
     property variant auth_object
 
+    TelegramClient {
+        id: client
+        configPath: Gui.homePath + "/qtelegram"
+        databasePath: Gui.homePath + "/qtelegram"
+        publicKeyFile: Gui.tgServer
+        phoneNumber: Gui.phoneNumber
+        onAuthNeeded: authCheckPhone()
+        onAuthLoggedIn: {
+            if( !auth_object )
+                return
+
+            auth_object.destroy()
+            Gui.firstTime = false
+        }
+        Component.onCompleted: {
+            if( phoneNumber.length != 0 )
+                initTelegramLibrary()
+        }
+    }
+
     Connections {
         target: Telegram
         onStartedChanged: status_changer.restart()
         onUnreadChanged: Gui.setSysTrayCounter(Telegram.unread)
-        onAuthenticatingChanged: {
-            if(Telegram.authenticating)
-                startAuthenticating()
-            else
-            if( auth_object ) {
-                auth_object.destroy()
-                Gui.firstTime = false
-            }
-        }
     }
     Connections {
         target: VersionChecker
@@ -94,7 +108,7 @@ Window {
             obj.source = "file://" + fonts[i]
         }
 
-        if( Telegram.authenticating || Gui.firstTime )
+        if( Gui.firstTime )
             startAuthenticating()
         if( Gui.donate && !Gui.donateViewShowed ) {
             Gui.donateViewShowed = true

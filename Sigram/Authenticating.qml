@@ -75,12 +75,7 @@ Item {
     Timer {
         id: show_timer
         interval: 1000
-        onTriggered: {
-            if( Telegram.waitAndGet == Enums.NoWaitAndGet )
-                auth.start()
-            else
-                auth.started = true
-        }
+        onTriggered: auth.started = true
     }
 
     function start() {

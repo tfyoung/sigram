@@ -24,7 +24,7 @@
 
 #define USERDATAS_DB_CONNECTION "userdata_db_connection"
 
-#define HOME_PATH QString( QDir::homePath() + "/.config/sialan/telegram/" )
+#define HOME_PATH QString( QDir::homePath() + "/.config/sialan/telegram.test/" )
 
 #ifdef Q_OS_MAC
 #define EMOJIS_PATH QString( QCoreApplication::applicationDirPath() + "../Resources/emojis/" )

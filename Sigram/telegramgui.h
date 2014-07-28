@@ -31,6 +31,9 @@ class TelegramGui : public QObject
     Q_PROPERTY(int desktopSession READ desktopSession NOTIFY desktopSessionChanged)
     Q_PROPERTY(QString appPath READ appPath NOTIFY appPathChanged)
     Q_PROPERTY(QString background READ background WRITE setBackground NOTIFY backgroundChanged)
+    Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
+    Q_PROPERTY(QString homePath READ homePath WRITE setHomePath NOTIFY homePathChanged)
+    Q_PROPERTY(QString tgServer READ tgServer NOTIFY tgServerChanged)
     Q_PROPERTY(qreal chatListWidth READ chatListWidth WRITE setChatListWidth NOTIFY chatListWidthChanged)
     Q_PROPERTY(bool firstTime READ firstTime WRITE setFirstTime NOTIFY firstTimeChanged)
     Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
@@ -71,6 +74,14 @@ public:
 
     Q_INVOKABLE void setBackground( const QString & path );
     Q_INVOKABLE QString background() const;
+
+    Q_INVOKABLE void setPhoneNumber( const QString & phone );
+    Q_INVOKABLE QString phoneNumber() const;
+
+    Q_INVOKABLE void setHomePath( const QString & path );
+    Q_INVOKABLE QString homePath() const;
+
+    Q_INVOKABLE QString tgServer() const;
 
     Q_INVOKABLE void setChatListWidth( qreal w );
     Q_INVOKABLE qreal chatListWidth() const;
@@ -164,6 +175,9 @@ signals:
     void desktopSessionChanged();
     void appPathChanged();
     void backgroundChanged();
+    void phoneNumberChanged();
+    void homePathChanged();
+    void tgServerChanged();
     void chatListWidthChanged();
     void firstTimeChanged();
     void heightChanged();

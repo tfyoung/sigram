@@ -26,6 +26,8 @@ Column {
 
     property string country
 
+    signal goEmitted()
+
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
@@ -103,6 +105,8 @@ Column {
         if( phone_line.text.length == 0 )
             return
 
-        Telegram.waitAndGetPhoneCallBack( country_code.text + phone_line.text )
+        tgClient.phoneNumber = country_code.text + phone_line.text
+        tgClient.initTelegramLibrary()
+        goEmitted()
     }
 }
