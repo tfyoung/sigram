@@ -18,6 +18,7 @@
 
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     id: contact_list
@@ -26,43 +27,7 @@ Rectangle {
     color: "#ffffff"
 
     property int current
-
-    Connections {
-        target: Telegram
-        onContactsChanged: {
-            privates.contacts_refreshed = true
-            clist.refresh()
-        }
-        onDialogsChanged: {
-            privates.dialogs_refreshed = true
-            clist.refresh()
-        }
-        onStartedChanged: {
-            Telegram.updateDialogList()
-            Telegram.updateContactList()
-        }
-        onIncomingMsg: {
-            Telegram.updateDialogListUsingTimer()
-        }
-        onUserStatusChanged: {
-            clist.refresh()
-        }
-        onMsgChanged: {
-            Telegram.updateDialogListUsingTimer()
-        }
-    }
-
-    Connections {
-        target: Gui
-        onLoveChanged: clist.refresh()
-        onFavorited: clist.refresh()
-    }
-
-    QtObject {
-        id: privates
-        property bool contacts_refreshed: false
-        property bool dialogs_refreshed: false
-    }
+    property DialogItem currentDialog
 
     Rectangle {
         id: clist_frame
@@ -76,33 +41,33 @@ Rectangle {
         }
 
         ListView {
-            id: clist
+            id: dialogsListView
             anchors.fill: parent
             anchors.rightMargin: 8
-            model: ListModel{}
+            model: tgClient.dialogsModel
             header: Item{ height: cl_header.height }
             delegate: ContactListItem {
                 id: item
                 height: 57
-                width: clist.width
-                uid: user_id
-                realId: item.isDialog? dialog_id : user_id
-                selected: realId == contact_list.current
+                width: dialogsListView.width
+                dialogItem: dialogsListView.model.get(index)
+                selected: dialogItem == currentDialog
+                subText: model.topMessageFromFirstName + ": " + model.topMessageText + (model.typing ? dialogsListView.model.whoisTyping + "typing" : "");
+                date: formatDate(model.topMessageDate)
                 onClicked: {
-                    var iid = (item.isDialog? dialog_id : item.uid)
                     if( forwarding != 0 ) {
-                        forwardTo = iid
+                        forwardTo = dialogItem.id
                         return
                     }
 
-                    contact_list.current = iid
+                    currentDialog = dialogItem
                 }
             }
 
             section.property: "type"
             section.delegate: Item {
                 height: 38
-                width: clist.width
+                width: dialogsListView.width
 
                 Image {
                     id: sec_img
@@ -116,56 +81,15 @@ Rectangle {
                     source: section==1? "files/favorite.png" : (section==0? "files/love.png" : "files/contact.png")
                 }
             }
-
-            function refresh() {
-                if( !privates.contacts_refreshed || !privates.dialogs_refreshed )
-                    return
-
-                indicator.stop()
-                model.clear()
-                var contacts = Telegram.contactListUsers()
-                var dialogs = Telegram.dialogListIds()
-
-                for( var t=0; t<3; t++ ) {
-
-                    for( var i=0; i<dialogs.length; i++ ) {
-                        var dlg = dialogs[i]
-                        var type = 2
-                        if( dlg == Gui.love )
-                            type = 0
-                        else
-                        if( Gui.isFavorited(dlg) )
-                            type = 1
-
-                        if( type != t )
-                            continue
-
-                        if( Telegram.dialogLeaved(dlg) )
-                            continue
-                        model.append( {"user_id": 0, "dialog_id": dlg, "type": type} )
-                        if( Telegram.dialogIsChat(dlg) )
-                            Telegram.loadChatInfo(dlg)
-                        else
-                            Telegram.loadUserInfo(dlg)
-                        var cIndex = contacts.indexOf(dlg)
-                        if( cIndex != -1 )
-                            contacts.splice(cIndex,1)
-                    }
-                }
-
-                Telegram.loadUserInfo(Telegram.me)
-            }
-
-            Component.onCompleted: refresh()
         }
 
         NormalWheelScroll {
-            flick: clist
+            flick: dialogsListView
         }
 
         PhysicalScrollBar {
-            scrollArea: clist; height: clist.height; width: 8
-            anchors.right: parent.right; anchors.top: clist.top; color: "#333333"
+            scrollArea: dialogsListView; height: dialogsListView.height; width: 8
+            anchors.right: parent.right; anchors.top: dialogsListView.top; color: "#333333"
             anchors.topMargin: cl_header.height
         }
     }

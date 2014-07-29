@@ -46,6 +46,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         color: "#555555"
         current: contact_list.current
+        currentDialog: contact_list.currentDialog
     }
 
     Mirror {

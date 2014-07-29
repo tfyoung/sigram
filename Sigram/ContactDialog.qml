@@ -35,7 +35,7 @@ Rectangle {
     ListView {
         id: clist
         anchors.fill: parent
-        model: ListModel{}
+        model: tgClient.contactsModel
         clip: true
 
         delegate: Rectangle {
@@ -44,7 +44,7 @@ Rectangle {
             width: clist.width
             color: marea.pressed || item.selected? "#E65245" : "#00000000"
 
-            property bool selected: selecteds_set.contains(user_id)
+            property bool selected: selecteds_set.contains(index)
 
             ContactImage {
                 id: contact_image
@@ -52,7 +52,7 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.margins: 4
-                uid: user_id
+                source: thumbnail
                 width: height
                 borderColor: "#ffffff"
                 onlineState: true
@@ -64,7 +64,7 @@ Rectangle {
                 anchors.leftMargin: 8
                 font.pointSize: 10
                 font.family: globalNormalFontFamily
-                text: Telegram.contactTitle(user_id)
+                text: firstName + lastName
             }
 
             MouseArea {
@@ -89,35 +89,6 @@ Rectangle {
                 }
             }
         }
-
-        function refresh() {
-            model.clear()
-            var contacts = Telegram.contactListUsers()
-            var dialogs = Telegram.dialogListIds()
-
-            for( var i=0; i<dialogs.length; i++ ) {
-                var cIndex = contacts.indexOf(dialogs[i])
-                if( cIndex != -1 )
-                    contacts.splice(cIndex,1)
-            }
-            for( var i=0; i<contacts.length; i++ ) {
-                model.append( {"user_id":contacts[i]} )
-                Telegram.loadUserInfo(contacts[i])
-            }
-        }
-
-        function refreshAll() {
-            model.clear()
-            var contacts = Telegram.contactListUsers()
-            for( var i=0; i<contacts.length; i++ ) {
-                var cnct = contacts[i]
-                if( cnct == Telegram.me )
-                    continue
-
-                model.append( {"user_id":cnct} )
-                Telegram.loadUserInfo(cnct)
-            }
-        }
     }
 
     NormalWheelScroll {
@@ -130,11 +101,9 @@ Rectangle {
     }
 
     function showFullContacts() {
-        clist.refreshAll()
     }
 
     function showNeededContacts() {
-        clist.refresh()
     }
 
     function selectedContacts() {

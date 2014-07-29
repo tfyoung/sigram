@@ -247,4 +247,23 @@ Window {
         Gui.firstTime = true
         auth_object = auth_component.createObject(main)
     }
+
+    function formatDate(dateAsLong) {
+        var d = new Date(dateAsLong * 1000);
+        var today = new Date();
+        // if date is today, return hour in hh:mm format
+        if ((d.getDate() === today.getDate()) &&
+                (d.getTime() > today.getTime() - 86400000) &&
+                (d.getTime() < today.getTime() + 86400000)){
+            return Qt.formatTime(d, "hh:mm");
+        } else{
+            var oneWeekAgo = new Date();
+            oneWeekAgo.setTime(today.getTime() - 7 * 86400000);
+            // if current date is in the last 6 days, set the day of the week
+            if ((d.getTime() > oneWeekAgo.getTime()) && (d.getDate() !== oneWeekAgo.getDate())) {
+                return Qt.formatDate(d, "ddd");
+            }
+        }
+        return Qt.formatDate(d, "MMM d");
+    }
 }

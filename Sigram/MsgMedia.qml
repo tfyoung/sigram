@@ -30,7 +30,7 @@ Item {
     Connections {
         target: Telegram
         onMsgFileDownloading: {
-            if( msg_id != msgId )
+            if( msgId != msgId )
                 return
 
             p_bar.percent = percent
@@ -38,7 +38,7 @@ Item {
             f_indicator.start()
         }
         onMsgFileDownloaded: {
-            if( msg_id != msgId )
+            if( msgId != msgId )
                 return
 
             p_bar.visible = false

@@ -131,6 +131,9 @@ public:
     static void setDonateViewShowed(bool stt);
     static bool donateViewShowed();
 
+    Q_INVOKABLE QString convertDateToString( const QDateTime & date ) const;
+    Q_INVOKABLE QString convertIntToStringDate(int date ) const;
+
 public slots:
     void start();
     void sendNotify(quint64 msg_id);

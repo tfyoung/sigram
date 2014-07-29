@@ -18,6 +18,7 @@
 
 import QtQuick 2.0
 import org.sialan.telegram 1.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     id: send_frame
@@ -26,7 +27,7 @@ Rectangle {
     color: imageBack? "#66ffffff" : "#333333"
     clip: true
 
-    property int current
+    property DialogItem current
     property bool smilies: false
 
     property alias textInput: input.textInput
@@ -44,6 +45,12 @@ Rectangle {
         input.text = draft? draft : ""
         p_bar.visible = false
         privates.last = current
+    }
+
+    TLInputPeer {
+        id: input_peer
+        userId: current? current.id : 0
+        classType: current && current.isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
     }
 
     QtObject {
@@ -66,7 +73,7 @@ Rectangle {
         id: typing_send_typing
         interval: 2000
         onTriggered: {
-            Telegram.setTypingState(typing_send_typing.current,true)
+            tgClient.messagesSetTyping(input_peer,true)
             typing_state_timer.restart()
             if( onceAgain )
                 typing_send_typing.restart()
@@ -194,7 +201,7 @@ Rectangle {
         if( input.text.trim().length == 0 )
             return
 
-        Telegram.sendMessage(send_frame.current,input.text.trim())
+        tgClient.messagesSendMessage(input_peer,input.text.trim())
         Telegram.setStatusOnline(true)
         input.text = ""
         setNotTyping()
@@ -206,14 +213,14 @@ Rectangle {
             return
         }
 
-        Telegram.setTypingState(send_frame.current,true)
+        tgClient.messagesSetTyping(input_peer,true)
         typing_send_typing.current = send_frame.current
         typing_send_typing.onceAgain = false
         typing_send_typing.restart()
     }
 
     function setNotTyping() {
-        Telegram.setTypingState(send_frame.current,false)
+        tgClient.messagesSetTyping(input_peer,false)
         typing_state_timer.stop()
         typing_send_typing.stop()
     }

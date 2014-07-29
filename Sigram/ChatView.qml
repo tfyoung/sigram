@@ -19,12 +19,15 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 import org.sialan.telegram 1.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     id: chat_view
     width: 100
     height: 62
     clip: true
+
+    property DialogItem currentDialog
 
     property int current: 0
     property int cache
@@ -37,101 +40,6 @@ Rectangle {
 
     property int limit: 20
     property int loadeds: 0
-
-    onCurrentChanged: {
-        chat_list.clear()
-        load(limit)
-        chat_list.goToEnd()
-    }
-
-    Connections {
-        target: Telegram
-        onUserStatusChanged: {
-        }
-        onIncomingMsg: {
-            indicator.stop()
-            dis_anim_timer.restart()
-        }
-        onMessageDeleted: {
-            var tmp = main.current
-            main.current = 0
-            main.current = tmp
-        }
-        onMessageRestored: {
-            var tmp = main.current
-            main.current = 0
-            main.current = tmp
-        }
-        onIncomingNewMsg: {
-            if( Telegram.messageIsDeleted(msg_id) )
-                return
-
-            var to_id = Telegram.messageToId(msg_id)
-            var fr_id = Telegram.messageFromId(msg_id)
-            var is_chat = Telegram.dialogIsChat(chat_view.current)
-            var msg_out = Telegram.messageOut(msg_id)
-
-            if( to_id == 0 || fr_id == 0 )
-                return
-
-            if( is_chat && to_id !== chat_view.current ){
-                sendNotify(msg_id)
-                return
-            }
-            else
-            if( !is_chat ) {
-                if( msg_out && to_id !== chat_view.current ){
-                    sendNotify(msg_id)
-                    return
-                }
-                else
-                if( !msg_out && fr_id !== chat_view.current ){
-                    sendNotify(msg_id)
-                    return
-                }
-                else
-                if( Telegram.dialogIsChat(to_id) || Telegram.dialogIsChat(fr_id) ){
-                    sendNotify(msg_id)
-                    return
-                }
-            }
-
-            indicator.stop()
-            if( chat_view.current != 0 )
-                chat_list.append(msg_id)
-            if( !main.active || !main.visible ) {
-                sendNotify(msg_id)
-                return
-            }
-            if( Telegram.messageUnread(msg_id) === 1 )
-                Telegram.markRead(chat_view.current)
-        }
-        onMsgSent: {
-            var index = -1
-            if( old_id == 0 )
-                return
-
-            for( var i=0; i<chat_list.model.count; i++ )
-                if( chat_list.model.get(i).msg == old_id )
-                {
-                    index = i
-                    break;
-                }
-            if( index == -1 )
-                return
-
-            chat_list.disableAnims = false
-            dis_anim_timer.restart()
-
-            chat_list.model.setProperty(index,"msg",msg_id)
-        }
-    }
-
-    StaticObjectHandler {
-        id: msg_obj_handler
-        createMethod: "createMsgItem"
-        createObject: chat_view
-    }
 
     Item {
         id: chat_list_frame
@@ -149,96 +57,25 @@ Rectangle {
         ListView {
             id: chat_list
             anchors.fill: parent
-            model: ListModel{}
+            model: tgClient.getMessagesModelOfDialog(currentDialog.id)
             spacing: 5
             cacheBuffer: 500
-            verticalLayoutDirection: ListView.BottomToTop
-
-            property bool disableAnims: false
-
-            Timer {
-                id: dis_anim_timer
-                interval: 500
-                repeat: false
-                onTriggered: chat_list.disableAnims = false
-            }
-
-            onAtYBeginningChanged: if(atYBeginning && contentHeight>=height) chat_view.load(loadeds+limit)
+            onCountChanged: goToEnd()
 
             footer: Item {
-                width: chat_list.width
-                height: title_bar.height
-            }
-
-            header: Item {
                 width: chat_list.width
                 height: send_frame.height + (smilies_frame.visible? smilies_frame.height : 0)
             }
 
-            property bool firstObj: false
-            delegate: msg_component /*Item {
-                id: item
+            header: Item {
                 width: chat_list.width
-                height: itemObj? itemObj.height : 100
-
-                property variant itemObj
-                property int msgId: msg
-
-                onMsgIdChanged: if(itemObj) itemObj.mid = msgId
-
-                Component.onCompleted: {
-                    itemObj = msg_obj_handler.newObject()
-                    itemObj.mid = msgId
-                    item.data = [itemObj]
-                    itemObj.anchors.left = item.left
-                    itemObj.anchors.right = item.right
-                    if( index == 0 )
-                        itemObj.ding()
-                }
-                Component.onDestruction: {
-                    msg_obj_handler.freeObject(itemObj)
-                }
-            }*/
-
-            function append( msg_id ) {
-                Gui.call( chat_list, "append_prev", msg_id )
+                height: title_bar.height
             }
 
-            function append_prev( msg_id ) {
-                var index = 0
-                for( var i=0; i<model.count; i++ ) {
-                    var msg = model.get(i).msg
-                    if( msg > msg_id )
-                        index = i+1
-                    else
-                    if( msg == msg_id )
-                        return;
-                    else
-                        break;
-                }
-
-                if( msg_id < 0 )
-                    index = 0
-
-                Gui.call( chat_list, "insertToModel", index, msg_id )
-                loadeds++
-            }
-
-            function insertToModel( index, msg_id ) {
-                model.insert(index, {"msg":msg_id} )
-            }
-
-            function clear() {
-                Gui.call( chat_list, "clear_prev" )
-            }
-
-            function clear_prev() {
-                loadeds = 0
-                model.clear()
-            }
+            delegate: msg_component
 
             function goToEnd() {
-                Gui.call( chat_list, "positionViewAtBeginning" )
+                Gui.call( chat_list, "positionViewAtEnd" )
             }
         }
     }
@@ -387,7 +224,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        current: chat_view.current
+        current: currentDialog
     }
 
     Item {
@@ -436,13 +273,12 @@ Rectangle {
             width: chat_list.width
             height: msg_item.visible? msg_item.height : msg_action.height
 
-            property int service: Telegram.messageService(mid)
-            property int mid: msg
+            property int service: 0
+            property bool disableAnims: false
 
             MsgAction {
                 id: msg_action
                 anchors.centerIn: parent
-                msg_id: item.mid
                 visible: item.service != 0
             }
 
@@ -450,75 +286,26 @@ Rectangle {
                 id: msg_item
                 width: parent.width
                 visible: item.service == 0
-                msg_id: item.mid
                 transformOrigin: Item.Center
+                msgId: model.id
+                messageBody: text
+                messageFromName: fromFirstName + " " + fromLastName
+                messageOut: out
+                messageUnread: unread
+                messageFromThumbnail: fromThumbnail
+                messageDate: formatDate(model.date)
+                messageFwdId: fwdFromId
 
                 onContactSelected: {
                     u_config.userId = uid
                     chat_view.userConfig = true
                 }
-
-                Behavior on y {
-                    NumberAnimation{ easing.type: Easing.OutCubic; duration: chat_list.disableAnims? 0 : 600 }
-                }
-                Behavior on scale {
-                    NumberAnimation{ easing.type: Easing.OutCubic; duration: chat_list.disableAnims? 0 : 600 }
-                }
-
-                Component.onCompleted: {
-                    y = 0
-                    scale = 1
-                }
-            }
-
-            function ding() {
-                if( chat_list.disableAnims )
-                    return
-                if( !msg_item.visible )
-                    return
-
-                chat_list.disableAnims = true
-                msg_item.y = msg_item.height
-                msg_item.scale = 1.1
-                chat_list.disableAnims = false
-                msg_item.y = 0
-                msg_item.scale = 1
             }
         }
-    }
-
-    function load( size ) {
-        Gui.call( chat_view, "load_prev", size )
-    }
-
-    function load_prev( size ) {
-        userConfig = false
-        if( current == 0 )
-            return
-
-        indicator.start()
-        chat_list.disableAnims = true
-
-        var ids = Telegram.messagesOf(current)
-
-        var start = ids.length-size
-        if( start<0 )
-            start = 0
-
-        for( var i=start; i<ids.length; i++ ) {
-            cache = ids[i]
-            chat_list.append(cache)
-        }
-
-        Telegram.getHistory(current,size)
     }
 
     function showConfigure( uid ) {
         u_config.userId = uid
         userConfig = true
-    }
-
-    function createMsgItem() {
-        return msg_component.createObject(chat_view)
     }
 }

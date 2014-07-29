@@ -18,6 +18,7 @@
 
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Item {
     id: contact_image
@@ -28,21 +29,7 @@ Item {
     property color borderColor: "#333333"
     property bool onlineState: false
 
-    property int uid
-
-    Connections {
-        target: Telegram
-        onUserPhotoChanged: {
-            if( user_id != uid )
-                return
-            img.path = Telegram.getPhotoPath(uid)
-        }
-        onChatPhotoChanged: {
-            if( user_id != uid )
-                return
-            img.path = Telegram.getPhotoPath(uid)
-        }
-    }
+    property real uid
 
     Rectangle {
         id: mask
@@ -62,7 +49,7 @@ Item {
         asynchronous: true
         source: path.length==0? "files/unknown.jpg" : "file://" + path
 
-        property string path: Telegram.getPhotoPath(uid)
+        property string path
     }
 
     ThresholdMask {

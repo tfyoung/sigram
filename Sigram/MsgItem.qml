@@ -23,34 +23,29 @@ Item {
     width: 100
     height: msg_row.height + itemMargins*4
 
-    property bool out: false
-    property int unread: 0
-    property int unsent: msg_id < 0
+    property bool messageOut: false
+    property int messageUnread: 0
+    property int messageUnsent
 
-    property int msg_id
+    property int msgId
 
     property real itemMargins: 10
 
+    property string messageFromThumbnail
+    property string fwdThumbnail
+
+    property string messageFromName
+    property string messageFwdName
+    property string messageBody
+    property string messageDate
+
+    property int messageFwdId
+
     signal contactSelected( int uid )
-
-    onMsg_idChanged: {
-        out = Telegram.messageOut(msg_id)
-        unread = Telegram.messageUnread(msg_id)
-    }
-
-    Connections {
-        target: Telegram
-        onMsgChanged: {
-            if( msg_id != msg_id )
-                return
-
-            item.unread = Telegram.messageUnread(msg_id)
-        }
-    }
 
     Row {
         id: msg_row
-        layoutDirection: item.out? Qt.RightToLeft : Qt.LeftToRight
+        layoutDirection: item.messageOut? Qt.RightToLeft : Qt.LeftToRight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: 20
@@ -64,8 +59,8 @@ Item {
             height: width
             smooth: true
             borderColor: "#222222"
-            uid: Telegram.messageFromId(msg_id)
             onlineState: true
+            source: messageFromThumbnail
 
             MouseArea {
                 anchors.fill: parent
@@ -80,11 +75,9 @@ Item {
             height: width
             smooth: true
             borderColor: "#222222"
-            uid: fwdId
             onlineState: true
-            visible: fwdId != 0
-
-            property int fwdId: Telegram.messageForwardId(msg_id)
+            visible: messageFwdId != 0
+            source: fwdThumbnail
 
             MouseArea {
                 anchors.fill: parent
@@ -105,14 +98,14 @@ Item {
 
             MsgPointCanvas {
                 id: msg_point
-                fillColor: item.out? "#2DA1B3" : "#CCCCCC"
-                x: item.out? frame.width - width/2 : -width/2
+                fillColor: item.messageOut? "#2DA1B3" : "#CCCCCC"
+                x: item.messageOut? frame.width - width/2 : -width/2
                 y: img.height/2 - height/2
             }
 
             Rectangle {
                 anchors.fill: parent
-                color: item.out? "#33B7CC" : "#E6E6E6"
+                color: item.messageOut? "#33B7CC" : "#E6E6E6"
 
                 MouseArea {
                     anchors.fill: parent
@@ -134,22 +127,20 @@ Item {
                     id: user
                     font.pointSize: 8
                     font.family: globalTextFontFamily
-                    text: Telegram.messageFromName( msg_id ) + (fwd==0?"":qsTr(" ,Fwd: ") + Telegram.title(fwd))
-                    color: item.out? "#ffffff" : "#333333"
-
-                    property int fwd: Telegram.messageForwardId(msg_id)
+                    text: messageFromName + (messageFwdId==0?"":qsTr(" ,Fwd: ") + messageFwdName)
+                    color: item.messageOut? "#ffffff" : "#333333"
                 }
 
                 TextEdit {
                     id: txt
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     width: msgWidth>item.width*0.6? item.width*0.6 : msgWidth
-                    text: Emojis.textToEmojiText( Telegram.messageBody(msg_id) )
-                    color: item.out? "#ffffff" : "#333333"
+                    text: Emojis.textToEmojiText( messageBody )
+                    color: item.messageOut? "#ffffff" : "#333333"
                     font.family: globalTextFontFamily
                     font.pointSize: 9
                     textFormat: TextEdit.RichText
-                    visible: Telegram.messageBody(msg_id).length != 0
+                    visible: messageBody.length != 0
                     readOnly: true
                     selectByMouse: true
                     selectionColor: "#0d80ec"
@@ -162,8 +153,8 @@ Item {
                     id: media
                     height: 192
                     width: 192
-                    msgId: msg_id
-                    out: item.out
+                    msgId: msgId
+                    out: item.messageOut
                     visible: !txt.visible
                 }
 
@@ -179,7 +170,7 @@ Item {
                         width: 12
                         height: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: item.out
+                        visible: item.messageOut
 
                         Image {
                             id: seen_indict
@@ -187,7 +178,7 @@ Item {
                             anchors.left: parent.left
                             width: 8
                             height: width
-                            visible: item.unread != 1 && item.out
+                            visible: item.messageUnread != 1 && item.messageOut
                             source: "files/sent.png"
                             sourceSize: Qt.size(width,height)
                         }
@@ -198,7 +189,7 @@ Item {
                             anchors.right: parent.right
                             width: 8
                             height: width
-                            visible: !item.unsent && item.out
+                            visible: !item.messageUnsent && item.messageOut
                             source: "files/sent.png"
                             sourceSize: Qt.size(width,height)
                         }
@@ -207,7 +198,7 @@ Item {
                             id: idct
                             anchors.fill: parent
                             indicatorSize: 12
-                            visible: !seen_indict.visible && !sent_indict.visible && item.out
+                            visible: !seen_indict.visible && !sent_indict.visible && item.messageOut
                             onVisibleChanged: {
                                 if( visible )
                                     start()
@@ -219,9 +210,9 @@ Item {
 
                     Text {
                         id: msg_date
-                        color: item.out? "#ffffff" : "#333333"
+                        color: item.messageOut? "#ffffff" : "#333333"
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Telegram.convertDateToString( Telegram.messageDate(msg_id) )
+                        text: messageDate
                     }
                 }
             }
@@ -237,15 +228,15 @@ Item {
             if( txt.selectedText.length != 0 )
                 txt.copy()
             else
-                Gui.copyText( Telegram.messageBody(msg_id) )
+                Gui.copyText( messageBody )
             break;
 
         case 1:
-            Telegram.deleteMessage(msg_id)
+            tgClient.messagesDeleteMessages(msgId)
             break;
 
         case 2:
-            forwarding = msg_id
+            forwarding = msgId
             break;
         }
     }

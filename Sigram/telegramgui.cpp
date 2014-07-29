@@ -612,6 +612,26 @@ bool TelegramGui::donateViewShowed()
     return tg_settings->value( "General/donateViewShowed", false ).toBool();
 }
 
+QString TelegramGui::convertDateToString(const QDateTime &date) const
+{
+    const QDateTime & today = QDateTime::currentDateTime();
+    if( date.date().year() != today.date().year() )
+        return date.date().toString("yyyy MMM d");
+    else
+    if( date.date().month() != today.date().month() )
+        return date.date().toString("MMM d");
+    else
+    if( date.date().day() != today.date().day() )
+        return date.date().toString("MMM d");
+    else
+        return date.time().toString("hh:mm");
+}
+
+QString TelegramGui::convertIntToStringDate(int date) const
+{
+    return convertDateToString( QDateTime::fromMSecsSinceEpoch(date) );
+}
+
 void TelegramGui::start()
 {
     if( p->engine )

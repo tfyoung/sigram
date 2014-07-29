@@ -17,6 +17,7 @@
 */
 
 import QtQuick 2.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     id: item
@@ -24,11 +25,11 @@ Rectangle {
     height: 62
     color: marea.pressed || selected? "#E65245" : "#ffffff"
 
-    property int uid
-    property bool selected: realId == contact_list.current
-    property bool isDialog: item.uid == 0
-    property int realId: item.isDialog? dialog_id : item.uid
-    property int onlineState: isDialog? Telegram.contactState(dialog_id) : Telegram.contactState(item.uid)
+    property DialogItem dialogItem
+    property bool selected: false
+
+    property alias subText: last_msg.text
+    property alias date: dateItem.text
 
     signal clicked()
 
@@ -51,9 +52,9 @@ Rectangle {
             anchors.bottom: row.bottom
             width: height
             smooth: true
-            uid: item.realId
+            source: item.dialogItem.thumbnail
             borderColor: "#ffffff"
-            onlineState: item.onlineState == 1
+            onlineState: dialogItem.userOnline
         }
 
         Column {
@@ -69,9 +70,9 @@ Rectangle {
 
                 Text {
                     id: txt
-                    text: item.isDialog ? Telegram.dialogTitle(dialog_id) : Telegram.contactTitle(item.uid)
+                    text: dialogItem.name
                     anchors.left: parent.left
-                    width: parent.width - date.width - 18
+                    width: parent.width - dateItem.width - 18
                     font.pointSize: 10
                     font.weight: Font.DemiBold
                     font.family: globalNormalFontFamily
@@ -83,13 +84,12 @@ Rectangle {
                 }
 
                 Text {
-                    id: date
+                    id: dateItem
                     anchors.right: parent.right
                     font.pointSize: 9
                     font.weight: Font.Normal
                     font.family: globalNormalFontFamily
                     color: marea.pressed || item.selected? "#dddddd" : "#555555"
-                    text: item.isDialog ? Telegram.convertDateToString(Telegram.dialogMsgDate(dialog_id)) : " "
                 }
             }
 
@@ -100,7 +100,6 @@ Rectangle {
 
                 Text {
                     id: last_msg
-                    text: Emojis.textToEmojiText( Telegram.dialogMsgLast(dialog_id) )
                     anchors.left: parent.left
                     width: parent.width
                     font.pointSize: 9
@@ -120,7 +119,7 @@ Rectangle {
         anchors.verticalCenter: item.verticalCenter
         anchors.right: item.right
         anchors.margins: 5
-        unread: item.isDialog? Telegram.dialogUnreadCount(dialog_id) : 0
+        unread: dialogItem.unreadCount
         visible: unread != 0 && !item.selected
     }
 
@@ -128,10 +127,10 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.topMargin: 4
-        anchors.rightMargin: date.width + 6
+        anchors.rightMargin: dateItem.width + 6
         height: 22
         width: 60
-        uid: item.realId
+        uid: dialogItem.id
         show: marea.containsMouse
     }
 }
