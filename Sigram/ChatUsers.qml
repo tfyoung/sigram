@@ -67,7 +67,6 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.margins: 4
-                uid: user_id
                 width: height
                 borderColor: "#ffffff"
                 onlineState: true

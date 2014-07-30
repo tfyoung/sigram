@@ -24,6 +24,9 @@ Rectangle {
     height: 62
     color: imageBack? "#66ffffff" : "#d9d9d9"
 
+    property variant fwdToDialog: tgClient.getDialog(forwardTo)
+    property variant fwdFrDialog: tgClient.getDialog(forwardingDialog)
+
     Column {
         id: column
         anchors.left: parent.left
@@ -36,7 +39,7 @@ Rectangle {
             width: 92
             height: width
             anchors.horizontalCenter: parent.horizontalCenter
-            source: tgClient.getDialog(forwardingDialog).thumbnail
+            source: fwdFrDialog? fwdFrDialog.thumbnail : ""
             onlineState: true
         }
 
@@ -103,7 +106,7 @@ Rectangle {
                     width: 92
                     height: width
                     anchors.horizontalCenter: parent.horizontalCenter
-                    source: tgClient.getDialog(forwardTo).thumbnail
+                    source: fwdToDialog? fwdToDialog.thumbnail : ""
                     onlineState: true
                 }
 
@@ -114,7 +117,7 @@ Rectangle {
                     font.family: globalTextFontFamily
                     color: "#333333"
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: tgClient.getDialog(forwardTo).name
+                    text: fwdToDialog? fwdToDialog.name : ""
                 }
             }
         }
@@ -151,7 +154,7 @@ Rectangle {
                 return
 
             input_peer.userId = forwardTo
-            input_peer.classType = tgClient.getDialog(forwardTo).isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
+            input_peer.classType = fwdToDialog.isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
 
             tgClient.messagesForwardMessage(input_peer,forwarding)
             forwardTo = 0

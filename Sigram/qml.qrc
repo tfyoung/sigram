@@ -28,7 +28,6 @@
         <file>files/unmute.png</file>
         <file>files/mute.png</file>
         <file>ChatFrame.qml</file>
-        <file>Configure.qml</file>
         <file>About.qml</file>
         <file>files/down.png</file>
         <file>MsgMedia.qml</file>

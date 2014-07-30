@@ -62,12 +62,6 @@ Item {
             borderColor: "#222222"
             onlineState: true
             source: messageFromThumbnail
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if( Telegram.contactContains(img.uid) ) item.contactSelected(img.uid)
-            }
         }
 
         ContactImage {
@@ -79,12 +73,6 @@ Item {
             onlineState: true
             visible: messageFwdId != 0
             source: fwdThumbnail
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if( Telegram.contactContains(fwd_img.uid) ) item.contactSelected(fwd_img.uid)
-            }
         }
 
         Item {

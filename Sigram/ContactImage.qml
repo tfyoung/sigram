@@ -29,8 +29,6 @@ Item {
     property color borderColor: "#333333"
     property bool onlineState: false
 
-    property real uid
-
     Rectangle {
         id: mask
         anchors.fill: parent

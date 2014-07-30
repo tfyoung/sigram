@@ -17,14 +17,16 @@
 */
 
 import QtQuick 2.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Item {
     id: u_conf
     width: 100
     height: 62
 
-    property int userId
-    property bool isChat: Telegram.dialogIsChat(userId)
+    property DialogItem dialog
+    property int userId: dialog.id
+    property bool isChat: dialog.isChat
 
     signal backRequest()
     signal chatRequest( string uid )
@@ -36,7 +38,7 @@ Item {
         notify.userMuted = Gui.isMuted(u_conf.userId)
         fave.checked = Gui.isFavorited(u_conf.userId)
         love.checked = (u_conf.userId == Gui.love)
-        name.text = Telegram.title(u_conf.userId).trim()
+        name.text = dialog.name
         privates.on_init = false
     }
 
@@ -95,7 +97,7 @@ Item {
         x: (name.x-width)/2
         anchors.top: header.bottom
         anchors.topMargin: 60
-        uid: u_conf.userId
+        source: dialog.thumbnail
         onlineState: true
         borderColor: "#333333"
 

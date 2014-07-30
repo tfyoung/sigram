@@ -175,8 +175,8 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        current: chat_view.current
-        onClicked: if(chat_view.current!=0) showConfigure(chat_view.current)
+        dialog: chat_view.currentDialog
+        onClicked: if(currentDialog) showConfigure(chat_view.currentDialog)
 
         Indicator {
             id: indicator
@@ -371,8 +371,8 @@ Rectangle {
         }
     }
 
-    function showConfigure( uid ) {
-        u_config.userId = uid
+    function showConfigure( dlg ) {
+        u_config.dialog = dlg
         userConfig = true
     }
 

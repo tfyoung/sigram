@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TELEGRAM_H
-#define TELEGRAM_H
+#ifndef STELEGRAM_H
+#define STELEGRAM_H
 
 #include <QObject>
 #include <QStringList>
@@ -203,4 +203,4 @@ private:
     STelegramPrivate *p;
 };
 
-#endif // TELEGRAM_H
+#endif // STELEGRAM_H

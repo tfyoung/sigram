@@ -17,6 +17,7 @@
 */
 
 import QtQuick 2.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     id: titlebar
@@ -27,6 +28,8 @@ Rectangle {
     property int current
     property bool isChat: Telegram.dialogIsChat(current)
     property bool fakes: false
+
+    property DialogItem dialog
 
     signal clicked()
 
@@ -72,7 +75,7 @@ Rectangle {
             anchors.horizontalCenter: column.horizontalCenter
             color: imageBack? "#333333" : "#bbbbbb"
             font.family: globalNormalFontFamily
-            text: Telegram.title(titlebar.current)
+            text: dialog.name
         }
 
         Text {
@@ -82,7 +85,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             color: imageBack? "#333333" : "#bbbbbb"
             visible: !is_typing.visible
-            text: titlebar.isChat? qsTr("Chat Room") : Telegram.contactLastSeenText(fakeCurrent)
+            text: dialog.isChat? qsTr("Chat Room") : formatDate(dialog.lastSeenOnline)
 
             property int fakeCurrent: fakes? 0 : titlebar.current
         }
