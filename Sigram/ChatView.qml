@@ -59,7 +59,6 @@ Rectangle {
             anchors.fill: parent
             model: tgClient.getMessagesModelOfDialog(currentDialog.id)
             spacing: 5
-            cacheBuffer: 500
             onCountChanged: goToEnd()
 
             footer: Item {
