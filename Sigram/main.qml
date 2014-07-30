@@ -47,6 +47,8 @@ Window {
 
     property alias focus: main_frame.focus
 
+    property string forwardingText
+    property int forwardingDialog
     property int forwarding: 0
     property int forwardTo: 0
 

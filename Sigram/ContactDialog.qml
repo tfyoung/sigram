@@ -45,6 +45,7 @@ Rectangle {
             color: marea.pressed || item.selected? "#E65245" : "#00000000"
 
             property bool selected: selecteds_set.contains(index)
+            property int user_id: model.id
 
             ContactImage {
                 id: contact_image
@@ -72,20 +73,20 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     if( contact_dialog.multiSelectMode ) {
-                        if( selecteds_set.contains(user_id) )
-                            selecteds_set.remove(user_id)
+                        if( selecteds_set.contains(item.user_id) )
+                            selecteds_set.remove(item.user_id)
                         else
-                            selecteds_set.insert(user_id)
+                            selecteds_set.insert(item.user_id)
 
-                        item.selected = selecteds_set.contains(user_id)
+                        item.selected = selecteds_set.contains(item.user_id)
                         return
                     }
                     if( forwarding != 0 ) {
-                        forwardTo = user_id
+                        forwardTo = item.user_id
                         return
                     }
 
-                    contact_dialog.selected(user_id)
+                    contact_dialog.selected(item.user_id)
                 }
             }
         }

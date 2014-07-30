@@ -34,6 +34,7 @@ Item {
     property string messageFromThumbnail
     property string fwdThumbnail
 
+    property string messageFromId
     property string messageFromName
     property string messageFwdName
     property string messageBody
@@ -237,6 +238,8 @@ Item {
 
         case 2:
             forwarding = msgId
+            forwardingDialog = messageFromId
+            forwardingText = messageBody
             break;
         }
     }

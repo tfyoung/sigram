@@ -104,6 +104,7 @@ Rectangle {
                     itemObj.messageFromName = fromFirstName + " " + fromLastName
                     itemObj.messageOut = out
                     itemObj.messageUnread = unread
+                    itemObj.messageFromId = model.fromId
                     itemObj.messageFromThumbnail = fromThumbnail
                     itemObj.messageDate = formatDate(model.date)
 //                    itemObj.messageFwdId = fwdFromId
@@ -322,6 +323,7 @@ Rectangle {
             property alias messageFromThumbnail: msg_item.messageFromThumbnail
             property alias messageDate: msg_item.messageDate
             property alias messageFwdId: msg_item.messageFwdId
+            property alias messageFromId: msg_item.messageFromId
 
             MsgAction {
                 id: msg_action

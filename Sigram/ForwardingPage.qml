@@ -17,6 +17,7 @@
 */
 
 import QtQuick 2.0
+import Ubuntu.Plugins.Telegram 0.1
 
 Rectangle {
     width: 100
@@ -35,7 +36,7 @@ Rectangle {
             width: 92
             height: width
             anchors.horizontalCenter: parent.horizontalCenter
-            uid: Telegram.messageFromId(forwarding)
+            source: tgClient.getDialog(forwardingDialog).thumbnail
             onlineState: true
         }
 
@@ -50,7 +51,7 @@ Rectangle {
             color: "#333333"
             maximumLineCount: 2
             elide: Text.ElideRight
-            text: Telegram.messageBody(forwarding)
+            text: forwardingText
         }
 
         Text {
@@ -102,7 +103,7 @@ Rectangle {
                     width: 92
                     height: width
                     anchors.horizontalCenter: parent.horizontalCenter
-                    uid: forwardTo
+                    source: tgClient.getDialog(forwardTo).thumbnail
                     onlineState: true
                 }
 
@@ -113,7 +114,7 @@ Rectangle {
                     font.family: globalTextFontFamily
                     color: "#333333"
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: Telegram.dialogTitle(forwardTo)
+                    text: tgClient.getDialog(forwardTo).name
                 }
             }
         }
@@ -149,9 +150,16 @@ Rectangle {
             if( forwardTo == 0 )
                 return
 
-            Telegram.forwardMessage( forwarding, forwardTo )
+            input_peer.userId = forwardTo
+            input_peer.classType = tgClient.getDialog(forwardTo).isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
+
+            tgClient.messagesForwardMessage(input_peer,forwarding)
             forwardTo = 0
             forwarding = 0
         }
+    }
+
+    TLInputPeer {
+        id: input_peer
     }
 }
