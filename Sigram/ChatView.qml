@@ -41,6 +41,12 @@ Rectangle {
     property int limit: 20
     property int loadeds: 0
 
+    StaticObjectHandler {
+        id: msg_obj_handler
+        createMethod: "createMsgItem"
+        createObject: chat_view
+    }
+
     Item {
         id: chat_list_frame
         anchors.fill: parent
@@ -71,7 +77,40 @@ Rectangle {
                 height: title_bar.height
             }
 
-            delegate: msg_component
+            delegate: Item {
+                id: item
+                width: chat_list.width
+                height: itemObj? itemObj.height : 100
+
+                property variant itemObj
+                property int msgId: model.id
+
+                onMsgIdChanged: if(itemObj) refresh()
+
+                Component.onCompleted: {
+                    itemObj = msg_obj_handler.newObject()
+                    refresh()
+                    item.data = [itemObj]
+                    itemObj.anchors.left = item.left
+                    itemObj.anchors.right = item.right
+                }
+                Component.onDestruction: {
+                    msg_obj_handler.freeObject(itemObj)
+                }
+
+                function refresh() {
+                    itemObj.msgId = model.id
+                    itemObj.messageBody = text
+                    itemObj.messageFromName = fromFirstName + " " + fromLastName
+                    itemObj.messageOut = out
+                    itemObj.messageUnread = unread
+                    itemObj.messageFromThumbnail = fromThumbnail
+                    itemObj.messageDate = formatDate(model.date)
+//                    itemObj.messageFwdId = fwdFromId
+                    if( model.id == currentDialog.topMessage )
+                        itemObj.ding()
+                }
+            }
 
             function goToEnd() {
                 Gui.call( chat_list, "positionViewAtEnd" )
@@ -275,6 +314,15 @@ Rectangle {
             property int service: 0
             property bool disableAnims: false
 
+            property alias msgId: msg_item.msgId
+            property alias messageBody: msg_item.messageBody
+            property alias messageFromName: msg_item.messageFromName
+            property alias messageOut: msg_item.messageOut
+            property alias messageUnread: msg_item.messageUnread
+            property alias messageFromThumbnail: msg_item.messageFromThumbnail
+            property alias messageDate: msg_item.messageDate
+            property alias messageFwdId: msg_item.messageFwdId
+
             MsgAction {
                 id: msg_action
                 anchors.centerIn: parent
@@ -286,18 +334,36 @@ Rectangle {
                 width: parent.width
                 visible: item.service == 0
                 transformOrigin: Item.Center
-                msgId: model.id
-                messageBody: text
-                messageFromName: fromFirstName + " " + fromLastName
-                messageOut: out
-                messageUnread: unread
-                messageFromThumbnail: fromThumbnail
-                messageDate: formatDate(model.date)
-                messageFwdId: fwdFromId
 
                 onContactSelected: {
                     u_config.userId = uid
                     chat_view.userConfig = true
+                }
+
+                Behavior on y {
+                    NumberAnimation{ easing.type: Easing.OutCubic; duration: chat_list.disableAnims? 0 : 600 }
+                }
+                Behavior on scale {
+                    NumberAnimation{ easing.type: Easing.OutCubic; duration: chat_list.disableAnims? 0 : 600 }
+                }
+
+                Component.onCompleted: {
+                    y = 0
+                    scale = 1
+                }
+
+                function ding() {
+                    if( chat_list.disableAnims )
+                        return
+                    if( !msg_item.visible )
+                        return
+
+                    chat_list.disableAnims = true
+                    msg_item.y = msg_item.height
+                    msg_item.scale = 1.1
+                    chat_list.disableAnims = false
+                    msg_item.y = 0
+                    msg_item.scale = 1
                 }
             }
         }
@@ -306,5 +372,9 @@ Rectangle {
     function showConfigure( uid ) {
         u_config.userId = uid
         userConfig = true
+    }
+
+    function createMsgItem() {
+        return msg_component.createObject(chat_view)
     }
 }
