@@ -19,7 +19,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
-import Ubuntu.Plugins.Telegram 0.1
+import Telegram 0.1
 
 Window {
     id: main

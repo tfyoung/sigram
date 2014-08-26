@@ -18,7 +18,7 @@
 
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
-import Ubuntu.Plugins.Telegram 0.1
+import Telegram 0.1
 
 Rectangle {
     id: contact_list
