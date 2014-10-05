@@ -106,7 +106,7 @@ Column {
             return
 
         tgClient.phoneNumber = country_code.text + phone_line.text
-        tgClient.initTelegramLibrary()
+        tgClient.init()
         goEmitted()
     }
 }

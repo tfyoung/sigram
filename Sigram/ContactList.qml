@@ -44,7 +44,7 @@ Rectangle {
             id: dialogsListView
             anchors.fill: parent
             anchors.rightMargin: 8
-            model: tgClient.dialogsModel
+            model: DialogsModel{}
             header: Item{ height: cl_header.height }
             delegate: ContactListItem {
                 id: item
@@ -62,6 +62,8 @@ Rectangle {
 
                     currentDialog = dialogItem
                 }
+
+                Component.onCompleted: console.debug("\n\n\n:D\n\n\n")
             }
 
             section.property: "type"

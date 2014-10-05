@@ -63,7 +63,10 @@ Rectangle {
         ListView {
             id: chat_list
             anchors.fill: parent
-            model: tgClient.getMessagesModelOfDialog(currentDialog.id)
+            model: MessagesModel {
+                dialogId: currentDialog.id
+            }
+
             spacing: 5
             onCountChanged: goToEnd()
 

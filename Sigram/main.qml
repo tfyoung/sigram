@@ -68,6 +68,12 @@ Window {
             auth_object.destroy()
             Gui.firstTime = false
         }
+
+        onAuthSendCodeAnswer: {
+            console.debug(":D")
+        }
+
+        onAuthSendCallAnswer: console.debug(":/")
         Component.onCompleted: {
             if( phoneNumber.length != 0 )
                 initTelegramLibrary()
