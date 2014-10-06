@@ -44,7 +44,7 @@ Rectangle {
         msg_drafts.insert(privates.last, input.text)
         input.text = draft? draft : ""
         p_bar.visible = false
-        privates.last = current
+        privates.last = current.id
     }
 
     TLInputPeer {

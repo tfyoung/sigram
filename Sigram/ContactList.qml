@@ -29,6 +29,17 @@ Rectangle {
     property int current
     property DialogItem currentDialog
 
+    DialogsModel {
+        id: dialogsModel
+    }
+
+    DialogsProxy {
+        id: dialogsProxy
+        sourceModel: dialogsModel
+        sortRole: DialogsModel.TopMessageDateRole
+        ascending: false
+    }
+
     Rectangle {
         id: clist_frame
         anchors.fill: parent
@@ -44,15 +55,15 @@ Rectangle {
             id: dialogsListView
             anchors.fill: parent
             anchors.rightMargin: 8
-            model: DialogsModel{}
+            model: dialogsModel
             header: Item{ height: cl_header.height }
             delegate: ContactListItem {
                 id: item
                 height: 57
                 width: dialogsListView.width
-                dialogItem: dialogsListView.model.get(index)
+                dialogItem: dialogsModel.get(index)
                 selected: dialogItem == currentDialog
-                subText: model.topMessageFromFirstName + ": " + model.topMessageText + (model.typing ? dialogsListView.model.whoisTyping + "typing" : "");
+                subText: model.topMessageFromFirstName + ": " + model.topMessageText + (model.typing ? dialogsModel.whoisTyping + "typing" : "");
                 date: formatDate(model.topMessageDate)
                 onClicked: {
                     if( forwarding != 0 ) {
@@ -62,8 +73,6 @@ Rectangle {
 
                     currentDialog = dialogItem
                 }
-
-                Component.onCompleted: console.debug("\n\n\n:D\n\n\n")
             }
 
             section.property: "type"

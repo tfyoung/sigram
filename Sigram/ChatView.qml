@@ -29,6 +29,14 @@ Rectangle {
 
     property DialogItem currentDialog
 
+    onCurrentDialogChanged: {
+        messagesModel.dialogId = currentDialog.id
+        messagesModel.peerType = currentDialog.peerType
+        messagesModel.updateQuery();
+        messagesModel.fetchMore();
+        current = currentDialog.id
+    }
+
     property int current: 0
     property int cache
 
@@ -40,6 +48,17 @@ Rectangle {
 
     property int limit: 20
     property int loadeds: 0
+
+    MessagesModel {
+        id: messagesModel
+    }
+
+    SortProxyModel {
+        id: messagesProxy
+        sourceModel: messagesModel
+        sortRole: MessagesModel.DateRole
+        ascending: false
+    }
 
     StaticObjectHandler {
         id: msg_obj_handler
@@ -63,9 +82,7 @@ Rectangle {
         ListView {
             id: chat_list
             anchors.fill: parent
-            model: MessagesModel {
-                dialogId: currentDialog.id
-            }
+            model: messagesModel
 
             spacing: 5
             onCountChanged: goToEnd()
@@ -91,6 +108,7 @@ Rectangle {
                 onMsgIdChanged: if(itemObj) refresh()
 
                 Component.onCompleted: {
+//                    itemObj = createMsgItem()
                     itemObj = msg_obj_handler.newObject()
                     refresh()
                     item.data = [itemObj]
