@@ -33,6 +33,11 @@ Rectangle {
 
     signal clicked()
 
+    onDialogChanged: {
+        title.text = dialog.name
+        last_time.text = dialog.isChat? qsTr("Chat Room") : formatDate(dialog.lastSeenOnline)
+    }
+
     Connections {
         target: Telegram
         onUserIsTyping: {
@@ -75,7 +80,6 @@ Rectangle {
             anchors.horizontalCenter: column.horizontalCenter
             color: imageBack? "#333333" : "#bbbbbb"
             font.family: globalNormalFontFamily
-            text: dialog.name
         }
 
         Text {
@@ -85,7 +89,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             color: imageBack? "#333333" : "#bbbbbb"
             visible: !is_typing.visible
-            text: dialog.isChat? qsTr("Chat Room") : formatDate(dialog.lastSeenOnline)
 
             property int fakeCurrent: fakes? 0 : titlebar.current
         }

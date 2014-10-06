@@ -33,6 +33,9 @@ Rectangle {
     property alias textInput: input.textInput
 
     onCurrentChanged: {
+        input_peer.userId = current? current.id : 0
+        input_peer.classType = current && current.isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
+
         if( typing_state_timer.running ) {
             Telegram.setTypingState(privates.last,state)
             typing_state_timer.stop()
@@ -49,8 +52,6 @@ Rectangle {
 
     TLInputPeer {
         id: input_peer
-        userId: current? current.id : 0
-        classType: current && current.isChat? TLInputPeer.TypeInputPeerChat : TLInputPeer.TypeInputPeerContact
     }
 
     QtObject {

@@ -83,16 +83,17 @@ Rectangle {
             id: chat_list
             anchors.fill: parent
             model: messagesModel
+            verticalLayoutDirection: ListView.BottomToTop
 
             spacing: 5
             onCountChanged: goToEnd()
 
-            footer: Item {
+            header: Item {
                 width: chat_list.width
                 height: send_frame.height + (smilies_frame.visible? smilies_frame.height : 0)
             }
 
-            header: Item {
+            footer: Item {
                 width: chat_list.width
                 height: title_bar.height
             }
@@ -135,7 +136,7 @@ Rectangle {
             }
 
             function goToEnd() {
-                Gui.call( chat_list, "positionViewAtEnd" )
+                Gui.call( chat_list, "positionViewAtBeginning" )
             }
         }
     }
